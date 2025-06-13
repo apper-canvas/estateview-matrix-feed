@@ -45,11 +45,9 @@ const loadProperty = async () => {
       }
     };
     loadProperty();
-  }, [id, navigate]);
 }, [id, navigate]);
 
-const handleSaveProperty = async () => {
-const handleSaveProperty = async () => {
+  const handleSaveProperty = async () => {
     try {
       if (isSaved) {
         await SavedPropertyService.removeByPropertyId(id);
@@ -166,9 +164,10 @@ const handleSaveProperty = async () => {
           <div className="lg:col-span-2">
             {/* Property Header */}
             <div className="mb-6">
-              <Text as="h1" className="text-3xl md:text-4xl font-display font-bold text-primary mb-2">
+<Text as="h1" className="text-3xl md:text-4xl font-display font-bold text-primary mb-2">
                 {property.address}
-<Text as="p" className="text-lg text-gray-600 mb-4">
+              </Text>
+              <Text as="p" className="text-lg text-gray-600 mb-4">
                 {property.city}, {property.state} {property.zip_code}
               </Text>
               <Text as="div" className="text-3xl font-bold text-accent mb-4">
