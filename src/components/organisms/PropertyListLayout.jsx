@@ -33,7 +33,7 @@ const PropertyListLayout = ({ properties, viewMode, onCardClick, onRemovePropert
           <PropertyCard 
             property={property} 
             layout={viewMode}
-            onClick={() => onCardClick(property.id)}
+onClick={() => onCardClick(property.Id)}
             showSavedDate={showSavedDate}
             onRemove={onRemoveProperty}
             onAddNote={onAddNote}

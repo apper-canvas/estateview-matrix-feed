@@ -26,16 +26,22 @@ const PropertyCard = ({
   const [note, setNote] = useState(initialNote);
 
   useEffect(() => {
-    const checkSavedStatus = async () => {
+const checkSavedStatus = async () => {
       try {
         const savedProperties = await SavedPropertyService.getAll();
-        setIsSaved(savedProperties.some(sp => sp.propertyId === property.id));
+        setIsSaved(savedProperties.some(sp => sp.property_id.toString() === property.Id.toString()));
       } catch (err) {
         console.error("Failed to check saved status:", err);
       }
     };
     checkSavedStatus();
-  }, [property.id]);
+  }, [property.Id]);
+
+  const formatSquareFeet = (sqft) => {
+    return sqft ? sqft.toLocaleString() : 'N/A';
+  };
+
+  const handleSaveProperty = async (e) => {
 
   useEffect(() => {
     setNote(initialNote);
@@ -46,17 +52,17 @@ const PropertyCard = ({
   };
 
   const handleSaveProperty = async (e) => {
-    e.stopPropagation();
+e.stopPropagation();
     try {
       if (isSaved) {
-        await SavedPropertyService.removeByPropertyId(property.id);
+        await SavedPropertyService.removeByPropertyId(property.Id);
         setIsSaved(false);
         toast.success('Property removed from saved');
         if (onRemove) onRemove();
       } else {
         await SavedPropertyService.create({
-          propertyId: property.id,
-          savedDate: new Date().toISOString(),
+          property_id: property.Id,
+          saved_date: new Date().toISOString(),
           notes: ''
         });
         setIsSaved(true);
@@ -123,24 +129,24 @@ const PropertyCard = ({
               )}
             </div>
             
-            <Text className="text-gray-600 text-sm mb-3">
-              {property.city}, {property.state} {property.zipCode}
+<Text className="text-gray-600 text-sm mb-3">
+              {property.city}, {property.state} {property.zip_code}
             </Text>
 
             <div className="flex flex-wrap gap-4 text-sm text-gray-700 mb-3">
-              <PropertyMetric iconName="Bed" value={property.bedrooms} label="bed" />
+<PropertyMetric iconName="Bed" value={property.bedrooms} label="bed" />
               <PropertyMetric iconName="Bath" value={property.bathrooms} label="bath" />
-              <PropertyMetric iconName="Square" value={formatSquareFeet(property.squareFeet)} label="sq ft" />
+              <PropertyMetric iconName="Square" value={formatSquareFeet(property.square_feet)} label="sq ft" />
             </div>
 
             <Text className="text-gray-600 text-sm line-clamp-2">
               {property.description}
             </Text>
 
-            {showSavedDate && property.savedDate && (
+{showSavedDate && property.saved_date && (
               <div className="mt-3 pt-3 border-t">
                 <Text className="text-xs text-gray-500">
-                  Saved {new Date(property.savedDate).toLocaleDateString()}
+                  Saved {new Date(property.saved_date).toLocaleDateString()}
                 </Text>
               </div>
             )}
@@ -215,20 +221,20 @@ const PropertyCard = ({
           )}
         </div>
         
-        <Text className={`text-gray-600 mb-3 ${compact ? 'text-xs' : 'text-sm'}`}>
-          {property.city}, {property.state} {property.zipCode}
+<Text className={`text-gray-600 mb-3 ${compact ? 'text-xs' : 'text-sm'}`}>
+          {property.city}, {property.state} {property.zip_code}
         </Text>
 
         <div className={`flex flex-wrap gap-3 text-gray-700 ${compact ? 'text-xs' : 'text-sm'}`}>
-          <PropertyMetric iconName="Bed" value={property.bedrooms} label="bed" />
+<PropertyMetric iconName="Bed" value={property.bedrooms} label="bed" />
           <PropertyMetric iconName="Bath" value={property.bathrooms} label="bath" />
-          <PropertyMetric iconName="Square" value={formatSquareFeet(property.squareFeet)} label="sq ft" />
+          <PropertyMetric iconName="Square" value={formatSquareFeet(property.square_feet)} label="sq ft" />
         </div>
 
-        {showSavedDate && property.savedDate && (
+{showSavedDate && property.saved_date && (
           <div className="mt-3 pt-3 border-t flex justify-between items-center">
             <Text className="text-xs text-gray-500">
-              Saved {new Date(property.savedDate).toLocaleDateString()}
+              Saved {new Date(property.saved_date).toLocaleDateString()}
             </Text>
             {onAddNote && (
               <Button

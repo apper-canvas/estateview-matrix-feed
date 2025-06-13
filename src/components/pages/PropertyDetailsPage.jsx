@@ -24,7 +24,7 @@ const PropertyDetailsPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const loadProperty = async () => {
+const loadProperty = async () => {
       setLoading(true);
       setError(null);
       try {
@@ -36,7 +36,7 @@ const PropertyDetailsPage = () => {
         setProperty(result);
         
         const savedProperties = await SavedPropertyService.getAll();
-        setIsSaved(savedProperties.some(sp => sp.propertyId === id));
+        setIsSaved(savedProperties.some(sp => sp.property_id.toString() === id));
       } catch (err) {
         setError(err.message || 'Failed to load property');
         toast.error('Failed to load property');
@@ -47,7 +47,11 @@ const PropertyDetailsPage = () => {
     loadProperty();
   }, [id, navigate]);
 
-  const handleSaveProperty = async () => {
+  const formatSquareFeet = (sqft) => {
+    return sqft ? sqft.toLocaleString() : 'N/A';
+  };
+
+const handleSaveProperty = async () => {
     try {
       if (isSaved) {
         await SavedPropertyService.removeByPropertyId(id);
@@ -55,8 +59,8 @@ const PropertyDetailsPage = () => {
         toast.success('Property removed from saved');
       } else {
         await SavedPropertyService.create({
-          propertyId: id,
-          savedDate: new Date().toISOString(),
+          property_id: id,
+          saved_date: new Date().toISOString(),
           notes: ''
         });
         setIsSaved(true);
@@ -166,9 +170,8 @@ const PropertyDetailsPage = () => {
             <div className="mb-6">
               <Text as="h1" className="text-3xl md:text-4xl font-display font-bold text-primary mb-2">
                 {property.address}
-              </Text>
-              <Text as="p" className="text-lg text-gray-600 mb-4">
-                {property.city}, {property.state} {property.zipCode}
+<Text as="p" className="text-lg text-gray-600 mb-4">
+                {property.city}, {property.state} {property.zip_code}
               </Text>
               <Text as="div" className="text-3xl font-bold text-accent mb-4">
                 <PriceDisplay price={property.price} />
@@ -178,8 +181,8 @@ const PropertyDetailsPage = () => {
               <div className="flex flex-wrap gap-6 text-gray-700">
                 <PropertyMetric iconName="Bed" value={property.bedrooms} label={property.bedrooms === 1 ? 'Bedroom' : 'Bedrooms'} />
                 <PropertyMetric iconName="Bath" value={property.bathrooms} label={property.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'} />
-                <PropertyMetric iconName="Square" value={formatSquareFeet(property.squareFeet)} label="sq ft" />
-                <PropertyMetric iconName="Calendar" value={property.yearBuilt} label="Built" />
+                <PropertyMetric iconName="Square" value={formatSquareFeet(property.square_feet)} label="sq ft" />
+                <PropertyMetric iconName="Calendar" value={property.year_built} label="Built" />
               </div>
             </div>
 
@@ -202,12 +205,12 @@ const PropertyDetailsPage = () => {
           <div className="lg:col-span-1">
             <PropertyInfoBlock 
               title="Property Details"
-              details={[
-                { label: 'Property Type', value: property.propertyType },
-                { label: 'Year Built', value: property.yearBuilt },
-                { label: 'Square Feet', value: formatSquareFeet(property.squareFeet) },
+details={[
+                { label: 'Property Type', value: property.property_type },
+                { label: 'Year Built', value: property.year_built },
+                { label: 'Square Feet', value: formatSquareFeet(property.square_feet) },
                 { label: 'Status', value: property.status, type: 'status' },
-                { label: 'Listed', value: new Date(property.listingDate).toLocaleDateString() },
+                { label: 'Listed', value: new Date(property.listing_date).toLocaleDateString() },
               ]}
               ctaButtons={[
                 { label: 'Schedule Viewing', onClick: () => {}, className: 'bg-accent text-white' },

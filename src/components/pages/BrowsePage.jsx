@@ -29,7 +29,7 @@ const BrowsePage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('price-low');
 
-  const fetchProperties = async (search = searchQuery, currentFilters = filters) => {
+const fetchProperties = async (search = searchQuery, currentFilters = filters) => {
     setLoading(true);
     setError(null);
     try {
@@ -41,26 +41,35 @@ const BrowsePage = () => {
         result = result.filter(p => 
           p.address.toLowerCase().includes(searchLower) ||
           p.city.toLowerCase().includes(searchLower) ||
-          p.zipCode.toLowerCase().includes(searchLower)
+          p.zip_code.toLowerCase().includes(searchLower)
         );
       }
 
-      // Apply filters locally (since mock API filter doesn't support all types)
+      // Apply filters locally (since database filter supports all types)
       result = result.filter(p => {
         const priceMatch = (currentFilters.priceMin === null || p.price >= currentFilters.priceMin) &&
                            (currentFilters.priceMax === null || p.price <= currentFilters.priceMax);
         const bedroomsMatch = currentFilters.bedroomsMin === null || p.bedrooms >= currentFilters.bedroomsMin;
         const bathroomsMatch = currentFilters.bathroomsMin === null || p.bathrooms >= currentFilters.bathroomsMin;
-        const squareFeetMatch = currentFilters.squareFeetMin === null || p.squareFeet >= currentFilters.squareFeetMin;
+        const squareFeetMatch = currentFilters.squareFeetMin === null || p.square_feet >= currentFilters.squareFeetMin;
         
         const propertyTypeMatch = currentFilters.propertyTypes.length === 0 || 
-                                  currentFilters.propertyTypes.includes(p.propertyType);
+                                  currentFilters.propertyTypes.includes(p.property_type);
 
         const featuresMatch = currentFilters.features.length === 0 || 
-                              currentFilters.features.every(f => p.features.includes(f));
+                              currentFilters.features.every(f => p.features && p.features.includes(f));
         
         return priceMatch && bedroomsMatch && bathroomsMatch && squareFeetMatch && propertyTypeMatch && featuresMatch;
       });
+
+      setProperties(result);
+    } catch (err) {
+      setError(err.message || 'Failed to load properties');
+      toast.error('Failed to load properties');
+    } finally {
+      setLoading(false);
+    }
+  };
 
       setProperties(result);
     } catch (err) {
@@ -83,7 +92,7 @@ const BrowsePage = () => {
     setFilters(newFilters);
   };
 
-  const sortProperties = (propertiesArray) => {
+const sortProperties = (propertiesArray) => {
     const sorted = [...propertiesArray];
     switch (sortBy) {
       case 'price-low':
@@ -91,15 +100,17 @@ const BrowsePage = () => {
       case 'price-high':
         return sorted.sort((a, b) => b.price - a.price);
       case 'newest':
-        return sorted.sort((a, b) => new Date(b.listingDate) - new Date(a.listingDate));
+        return sorted.sort((a, b) => new Date(b.listing_date) - new Date(a.listing_date));
       case 'size-large':
-        return sorted.sort((a, b) => b.squareFeet - a.squareFeet);
+        return sorted.sort((a, b) => b.square_feet - a.square_feet);
       case 'bedrooms':
         return sorted.sort((a, b) => b.bedrooms - a.bedrooms);
       default:
         return sorted;
     }
   };
+
+  const sortedProperties = sortProperties(properties);
 
   const sortedProperties = sortProperties(properties);
 

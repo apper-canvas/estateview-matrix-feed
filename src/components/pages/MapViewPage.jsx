@@ -17,7 +17,7 @@ const MapViewPage = () => {
   const [showSidebar, setShowSidebar] = useState(true);
 
   useEffect(() => {
-    const loadProperties = async () => {
+const loadProperties = async () => {
       setLoading(true);
       setError(null);
       try {
@@ -36,6 +36,33 @@ const MapViewPage = () => {
     };
     loadProperties();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-soft-white">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <EmptyErrorLoadingState type="loading" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-soft-white px-4">
+        <EmptyErrorLoadingState 
+          type="error"
+          icon="AlertCircle"
+          title="Failed to Load"
+          message={error}
+          onAction={() => window.location.reload()}
+          actionText="Try Again"
+        />
+      </div>
+    );
+  }
+
+  return (
 
   if (loading) {
     return (

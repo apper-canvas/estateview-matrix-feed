@@ -1,78 +1,222 @@
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Mock saved properties data
-let savedProperties = [
-  {
-    id: '1',
-    propertyId: '1',
-    savedDate: '2024-01-15T10:30:00Z',
-    notes: 'Love the open floor plan and natural light'
-  },
-  {
-    id: '2', 
-    propertyId: '3',
-    savedDate: '2024-01-20T14:15:00Z',
-    notes: ''
-  }
-];
+const { ApperClient } = window.ApperSDK;
 
 class SavedPropertyService {
+  static getApperClient() {
+    return new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+  }
+
   static async getAll() {
-    await delay(250);
-    return [...savedProperties];
+    try {
+      const client = this.getApperClient();
+      const params = {
+        "Fields": [
+          { "Field": { "Name": "Id" } },
+          { "Field": { "Name": "Name" } },
+          { "Field": { "Name": "Tags" } },
+          { "Field": { "Name": "Owner" } },
+          { "Field": { "Name": "property_id" } },
+          { "Field": { "Name": "saved_date" } },
+          { "Field": { "Name": "notes" } }
+        ]
+      };
+      
+      const response = await client.fetchRecords('saved_property', params);
+      
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching saved properties:", error);
+      throw error;
+    }
   }
 
   static async getById(id) {
-    await delay(200);
-    const saved = savedProperties.find(sp => sp.id === id);
-    return saved ? { ...saved } : null;
+    try {
+      const client = this.getApperClient();
+      const params = {
+        fields: ["Id", "Name", "Tags", "Owner", "property_id", "saved_date", "notes"]
+      };
+      
+      const response = await client.getRecordById('saved_property', id, params);
+      
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching saved property with ID ${id}:`, error);
+      throw error;
+    }
   }
 
   static async getByPropertyId(propertyId) {
-    await delay(200);
-    const saved = savedProperties.find(sp => sp.propertyId === propertyId);
-    return saved ? { ...saved } : null;
+    try {
+      const client = this.getApperClient();
+      const params = {
+        "Fields": [
+          { "Field": { "Name": "Id" } },
+          { "Field": { "Name": "Name" } },
+          { "Field": { "Name": "Tags" } },
+          { "Field": { "Name": "Owner" } },
+          { "Field": { "Name": "property_id" } },
+          { "Field": { "Name": "saved_date" } },
+          { "Field": { "Name": "notes" } }
+        ],
+        "where": [
+          {
+            "FieldName": "property_id",
+            "Operator": "ExactMatch",
+            "Values": [propertyId.toString()]
+          }
+        ]
+      };
+      
+      const response = await client.fetchRecords('saved_property', params);
+      
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      
+      return response.data && response.data.length > 0 ? response.data[0] : null;
+    } catch (error) {
+      console.error(`Error fetching saved property by property ID ${propertyId}:`, error);
+      throw error;
+    }
   }
 
   static async create(savedProperty) {
-    await delay(300);
-    const newSaved = {
-      ...savedProperty,
-      id: Date.now().toString(),
-      savedDate: savedProperty.savedDate || new Date().toISOString()
-    };
-    savedProperties.push(newSaved);
-    return { ...newSaved };
+    try {
+      const client = this.getApperClient();
+      
+      // Only include Updateable fields
+      const savedPropertyData = {
+        Name: savedProperty.Name || `Saved Property ${savedProperty.property_id}`,
+        Tags: savedProperty.Tags || '',
+        Owner: savedProperty.Owner,
+        property_id: parseInt(savedProperty.property_id || savedProperty.propertyId),
+        saved_date: savedProperty.saved_date || savedProperty.savedDate || new Date().toISOString(),
+        notes: savedProperty.notes || ''
+      };
+      
+      const params = {
+        records: [savedPropertyData]
+      };
+      
+      const response = await client.createRecord('saved_property', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to save property');
+        }
+        
+        return response.results[0].data;
+      }
+    } catch (error) {
+      console.error("Error creating saved property:", error);
+      throw error;
+    }
   }
 
   static async update(id, data) {
-    await delay(250);
-    const index = savedProperties.findIndex(sp => sp.id === id);
-    if (index === -1) {
-      throw new Error('Saved property not found');
+    try {
+      const client = this.getApperClient();
+      
+      // Only include Updateable fields
+      const updateData = {
+        Id: id,
+        ...Object.fromEntries(
+          Object.entries(data).filter(([key]) => 
+            ['Name', 'Tags', 'Owner', 'property_id', 'saved_date', 'notes'].includes(key)
+          )
+        )
+      };
+      
+      const params = {
+        records: [updateData]
+      };
+      
+      const response = await client.updateRecord('saved_property', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to update ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to update saved property');
+        }
+        
+        return response.results[0].data;
+      }
+    } catch (error) {
+      console.error("Error updating saved property:", error);
+      throw error;
     }
-    savedProperties[index] = { ...savedProperties[index], ...data };
-    return { ...savedProperties[index] };
   }
 
   static async delete(id) {
-    await delay(200);
-    const index = savedProperties.findIndex(sp => sp.id === id);
-    if (index === -1) {
-      throw new Error('Saved property not found');
+    try {
+      const client = this.getApperClient();
+      const params = {
+        RecordIds: [id]
+      };
+      
+      const response = await client.deleteRecord('saved_property', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to delete ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to delete saved property');
+        }
+        
+        return { success: true };
+      }
+    } catch (error) {
+      console.error("Error deleting saved property:", error);
+      throw error;
     }
-    savedProperties.splice(index, 1);
-    return { success: true };
   }
 
   static async removeByPropertyId(propertyId) {
-    await delay(200);
-    const index = savedProperties.findIndex(sp => sp.propertyId === propertyId);
-    if (index === -1) {
-      throw new Error('Saved property not found');
+    try {
+      // First find the saved property by property_id
+      const savedProperty = await this.getByPropertyId(propertyId);
+      if (!savedProperty) {
+        throw new Error('Saved property not found');
+      }
+      
+      // Then delete it by its ID
+      return await this.delete(savedProperty.Id);
+    } catch (error) {
+      console.error("Error removing saved property by property ID:", error);
+      throw error;
     }
-    savedProperties.splice(index, 1);
-    return { success: true };
   }
 }
 

@@ -12,7 +12,7 @@ const SavedPropertiesPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadSavedProperties = async () => {
+const loadSavedProperties = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -20,8 +20,8 @@ const SavedPropertiesPage = () => {
       const allProperties = await PropertyService.getAll();
       
       const matchedProperties = savedResult.map(saved => {
-        const property = allProperties.find(p => p.id === saved.propertyId);
-        return property ? { ...property, savedDate: saved.savedDate, notes: saved.notes } : null;
+        const property = allProperties.find(p => p.Id.toString() === saved.property_id.toString());
+        return property ? { ...property, saved_date: saved.saved_date, notes: saved.notes } : null;
       }).filter(Boolean);
       
       setSavedProperties(savedResult);
@@ -38,27 +38,27 @@ const SavedPropertiesPage = () => {
     loadSavedProperties();
   }, []);
 
-  const handleRemoveProperty = async (propertyId) => {
+const handleRemoveProperty = async (propertyId) => {
     try {
       await SavedPropertyService.removeByPropertyId(propertyId);
-      setSavedProperties(prev => prev.filter(sp => sp.propertyId !== propertyId));
-      setProperties(prev => prev.filter(p => p.id !== propertyId));
+      setSavedProperties(prev => prev.filter(sp => sp.property_id.toString() !== propertyId.toString()));
+      setProperties(prev => prev.filter(p => p.Id.toString() !== propertyId.toString()));
       toast.success('Property removed from saved');
     } catch (err) {
       toast.error('Failed to remove property');
     }
   };
 
-  const handleAddNote = async (propertyId, note) => {
+const handleAddNote = async (propertyId, note) => {
     try {
-      const savedProperty = savedProperties.find(sp => sp.propertyId === propertyId);
+      const savedProperty = savedProperties.find(sp => sp.property_id.toString() === propertyId.toString());
       if (savedProperty) {
-        await SavedPropertyService.update(savedProperty.id, { ...savedProperty, notes: note });
+        await SavedPropertyService.update(savedProperty.Id, { ...savedProperty, notes: note });
         setSavedProperties(prev => 
-          prev.map(sp => sp.propertyId === propertyId ? { ...sp, notes: note } : sp)
+          prev.map(sp => sp.property_id.toString() === propertyId.toString() ? { ...sp, notes: note } : sp)
         );
         setProperties(prev => 
-          prev.map(p => p.id === propertyId ? { ...p, notes: note } : p)
+          prev.map(p => p.Id.toString() === propertyId.toString() ? { ...p, notes: note } : p)
         );
         toast.success('Note updated');
       }
@@ -134,7 +134,7 @@ const SavedPropertiesPage = () => {
         <PropertyListLayout
           properties={properties}
           viewMode="grid" // Saved properties typically shown in a grid
-          onCardClick={(id) => window.location.href = `/property/${id}`} // Direct navigation
+onCardClick={(id) => window.location.href = `/property/${id}`} // Direct navigation
           showSavedDate={true}
           onRemoveProperty={handleRemoveProperty}
           onAddNote={handleAddNote}

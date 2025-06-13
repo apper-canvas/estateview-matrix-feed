@@ -1,105 +1,205 @@
-import propertyData from '../mockData/properties.json';
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const { ApperClient } = window.ApperSDK;
 
 class PropertyService {
+  static getApperClient() {
+    return new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+  }
+
   static async getAll() {
-    await delay(300);
-    return [...propertyData];
+    try {
+      const client = this.getApperClient();
+      const params = {
+        "Fields": [
+          { "Field": { "Name": "Id" } },
+          { "Field": { "Name": "Name" } },
+          { "Field": { "Name": "Tags" } },
+          { "Field": { "Name": "Owner" } },
+          { "Field": { "Name": "address" } },
+          { "Field": { "Name": "city" } },
+          { "Field": { "Name": "state" } },
+          { "Field": { "Name": "zip_code" } },
+          { "Field": { "Name": "price" } },
+          { "Field": { "Name": "bedrooms" } },
+          { "Field": { "Name": "bathrooms" } },
+          { "Field": { "Name": "square_feet" } },
+          { "Field": { "Name": "property_type" } },
+          { "Field": { "Name": "year_built" } },
+          { "Field": { "Name": "description" } },
+          { "Field": { "Name": "features" } },
+          { "Field": { "Name": "images" } },
+          { "Field": { "Name": "coordinates" } },
+          { "Field": { "Name": "listing_date" } },
+          { "Field": { "Name": "status" } }
+        ]
+      };
+      
+      const response = await client.fetchRecords('property', params);
+      
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      throw error;
+    }
   }
 
   static async getById(id) {
-    await delay(200);
-    const property = propertyData.find(p => p.id === id);
-    return property ? { ...property } : null;
-  }
-
-  static async search(query) {
-    await delay(400);
-    if (!query.trim()) {
-      return [...propertyData];
+    try {
+      const client = this.getApperClient();
+      const params = {
+        fields: [
+          "Id", "Name", "Tags", "Owner", "address", "city", "state", "zip_code",
+          "price", "bedrooms", "bathrooms", "square_feet", "property_type", 
+          "year_built", "description", "features", "images", "coordinates", 
+          "listing_date", "status"
+        ]
+      };
+      
+      const response = await client.getRecordById('property', id, params);
+      
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching property with ID ${id}:`, error);
+      throw error;
     }
-    
-    const searchTerm = query.toLowerCase();
-    return propertyData.filter(property =>
-      property.address.toLowerCase().includes(searchTerm) ||
-      property.city.toLowerCase().includes(searchTerm) ||
-      property.state.toLowerCase().includes(searchTerm) ||
-      property.zipCode.includes(searchTerm) ||
-      property.propertyType.toLowerCase().includes(searchTerm)
-    );
-  }
-
-  static async filter(filters) {
-    await delay(350);
-    let filtered = [...propertyData];
-
-    // Price filtering
-    if (filters.priceMin) {
-      filtered = filtered.filter(p => p.price >= filters.priceMin);
-    }
-    if (filters.priceMax) {
-      filtered = filtered.filter(p => p.price <= filters.priceMax);
-    }
-
-    // Bedrooms filtering
-    if (filters.bedroomsMin) {
-      filtered = filtered.filter(p => p.bedrooms >= filters.bedroomsMin);
-    }
-
-    // Bathrooms filtering
-    if (filters.bathroomsMin) {
-      filtered = filtered.filter(p => p.bathrooms >= filters.bathroomsMin);
-    }
-
-    // Square feet filtering
-    if (filters.squareFeetMin) {
-      filtered = filtered.filter(p => p.squareFeet >= filters.squareFeetMin);
-    }
-
-    // Property type filtering
-    if (filters.propertyTypes && filters.propertyTypes.length > 0) {
-      filtered = filtered.filter(p => filters.propertyTypes.includes(p.propertyType));
-    }
-
-    // Features filtering
-    if (filters.features && filters.features.length > 0) {
-      filtered = filtered.filter(p => 
-        filters.features.every(feature => 
-          p.features && p.features.includes(feature)
-        )
-      );
-    }
-
-    return filtered;
   }
 
   static async create(property) {
-    await delay(300);
-    const newProperty = {
-      ...property,
-      id: Date.now().toString(),
-      listingDate: new Date().toISOString()
-    };
-    return { ...newProperty };
+    try {
+      const client = this.getApperClient();
+      
+      // Only include Updateable fields
+      const propertyData = {
+        Name: property.Name,
+        Tags: property.Tags,
+        Owner: property.Owner,
+        address: property.address,
+        city: property.city,
+        state: property.state,
+        zip_code: property.zip_code,
+        price: property.price,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        square_feet: property.square_feet,
+        property_type: property.property_type,
+        year_built: property.year_built,
+        description: property.description,
+        features: property.features,
+        images: property.images,
+        coordinates: property.coordinates,
+        listing_date: property.listing_date,
+        status: property.status
+      };
+      
+      const params = {
+        records: [propertyData]
+      };
+      
+      const response = await client.createRecord('property', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to create property');
+        }
+        
+        return response.results[0].data;
+      }
+    } catch (error) {
+      console.error("Error creating property:", error);
+      throw error;
+    }
   }
 
   static async update(id, data) {
-    await delay(250);
-    const property = propertyData.find(p => p.id === id);
-    if (!property) {
-      throw new Error('Property not found');
+    try {
+      const client = this.getApperClient();
+      
+      // Only include Updateable fields
+      const updateData = {
+        Id: id,
+        ...Object.fromEntries(
+          Object.entries(data).filter(([key]) => 
+            ['Name', 'Tags', 'Owner', 'address', 'city', 'state', 'zip_code',
+             'price', 'bedrooms', 'bathrooms', 'square_feet', 'property_type',
+             'year_built', 'description', 'features', 'images', 'coordinates',
+             'listing_date', 'status'].includes(key)
+          )
+        )
+      };
+      
+      const params = {
+        records: [updateData]
+      };
+      
+      const response = await client.updateRecord('property', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to update ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to update property');
+        }
+        
+        return response.results[0].data;
+      }
+    } catch (error) {
+      console.error("Error updating property:", error);
+      throw error;
     }
-    return { ...property, ...data };
   }
 
   static async delete(id) {
-    await delay(200);
-    const property = propertyData.find(p => p.id === id);
-    if (!property) {
-      throw new Error('Property not found');
+    try {
+      const client = this.getApperClient();
+      const params = {
+        RecordIds: [id]
+      };
+      
+      const response = await client.deleteRecord('property', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to delete ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to delete property');
+        }
+        
+        return { success: true };
+      }
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      throw error;
     }
-    return { success: true };
   }
 }
 
