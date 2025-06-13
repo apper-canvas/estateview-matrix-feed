@@ -26,15 +26,15 @@ component: MapViewPage
     icon: 'Heart',
 component: SavedPropertiesPage
   },
-  property: {
+property: {
     id: 'property',
     label: 'Property Details',
     path: '/property/:id',
     icon: 'Building',
-component: PropertyDetailsPage,
+    component: PropertyDetailsPage,
     hidden: true
-  }
-home: {
+  },
+  home: {
     id: 'home',
     label: 'Home',
     path: '/',
