@@ -61,9 +61,7 @@ const loadProperties = async () => {
       </div>
     );
   }
-
 return (
-  return (
     <div className="h-screen flex overflow-hidden">
       {/* Map Container */}
       <div className="flex-1 relative">
