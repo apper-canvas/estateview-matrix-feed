@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import PropertyService from '@/services/api/PropertyService';
 import SearchBar from '@/components/organisms/SearchBar';
@@ -69,16 +69,7 @@ const fetchProperties = async (search = searchQuery, currentFilters = filters) =
     } finally {
       setLoading(false);
     }
-  };
-
-      setProperties(result);
-    } catch (err) {
-      setError(err.message || 'Failed to load properties');
-      toast.error('Failed to load properties');
-    } finally {
-      setLoading(false);
-    }
-  };
+};
 
   useEffect(() => {
     fetchProperties(searchQuery, filters);
@@ -110,9 +101,7 @@ const sortProperties = (propertiesArray) => {
     }
   };
 
-  const sortedProperties = sortProperties(properties);
-
-  const sortedProperties = sortProperties(properties);
+const sortedProperties = sortProperties(properties);
 
   if (loading) {
     return <EmptyErrorLoadingState type="loading" />;
