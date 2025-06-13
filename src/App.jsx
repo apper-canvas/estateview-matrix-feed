@@ -17,9 +17,9 @@ function App() {
                 key={route.id}
                 path={route.path === '/browse' ? '/' : route.path}
                 element={<route.component />}
-              />
+/>
             ))}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
         
