@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import ApperIcon from './ApperIcon';
+import ApperIcon from '@/components/ApperIcon';
+import Button from '@/components/atoms/Button';
+import Input from '@/components/atoms/Input';
+import Text from '@/components/atoms/Text';
+import FormField from '@/components/molecules/FormField';
 
 const FilterPanel = ({ filters, onChange, onClose }) => {
   const [localFilters, setLocalFilters] = useState(filters);
@@ -86,44 +90,42 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
       className="bg-white rounded-xl shadow-card p-6"
     >
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-display font-semibold text-primary">
+        <Text as="h3" className="text-lg font-display font-semibold text-primary">
           Filter Properties
-        </h3>
-        <motion.button
+        </Text>
+        <Button
+          onClick={onClose}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors !bg-transparent !shadow-none"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ApperIcon name="X" className="w-5 h-5" />
-        </motion.button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Price Range */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <Text as="label" className="block text-sm font-medium text-gray-700 mb-3">
             Price Range
-          </label>
+          </Text>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Minimum</label>
-              <input
+              <Text as="label" className="block text-xs text-gray-500 mb-1">Minimum</Text>
+              <Input
                 type="text"
                 value={formatNumber(localFilters.priceMin)}
                 onChange={(e) => handlePriceChange('priceMin', e.target.value)}
                 placeholder="$0"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Maximum</label>
-              <input
+              <Text as="label" className="block text-xs text-gray-500 mb-1">Maximum</Text>
+              <Input
                 type="text"
                 value={formatNumber(localFilters.priceMax)}
                 onChange={(e) => handlePriceChange('priceMax', e.target.value)}
                 placeholder="No limit"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               />
             </div>
           </div>
@@ -131,120 +133,119 @@ const FilterPanel = ({ filters, onChange, onClose }) => {
 
         {/* Bedrooms & Bathrooms */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <Text as="label" className="block text-sm font-medium text-gray-700 mb-3">
             Minimum Bedrooms & Bathrooms
-          </label>
+          </Text>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Bedrooms</label>
-              <select
+              <Text as="label" className="block text-xs text-gray-500 mb-1">Bedrooms</Text>
+              <Input
+                as="select"
                 value={localFilters.bedroomsMin || ''}
                 onChange={(e) => handleNumberChange('bedroomsMin', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               >
                 <option value="">Any</option>
                 {[1, 2, 3, 4, 5, 6].map(num => (
                   <option key={num} value={num}>{num}+</option>
                 ))}
-              </select>
+              </Input>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Bathrooms</label>
-              <select
+              <Text as="label" className="block text-xs text-gray-500 mb-1">Bathrooms</Text>
+              <Input
+                as="select"
                 value={localFilters.bathroomsMin || ''}
                 onChange={(e) => handleNumberChange('bathroomsMin', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               >
                 <option value="">Any</option>
                 {[1, 1.5, 2, 2.5, 3, 3.5, 4].map(num => (
                   <option key={num} value={num}>{num}+</option>
                 ))}
-              </select>
+              </Input>
             </div>
           </div>
         </div>
 
         {/* Square Footage */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <Text as="label" className="block text-sm font-medium text-gray-700 mb-3">
             Minimum Square Feet
-          </label>
-          <input
+          </Text>
+          <Input
             type="text"
             value={formatNumber(localFilters.squareFeetMin)}
             onChange={(e) => handleNumberChange('squareFeetMin', e.target.value.replace(/,/g, ''))}
             placeholder="Any size"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
           />
         </div>
       </div>
 
       {/* Property Types */}
       <div className="mt-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <Text as="label" className="block text-sm font-medium text-gray-700 mb-3">
           Property Type
-        </label>
+        </Text>
         <div className="flex flex-wrap gap-2">
           {propertyTypes.map(type => (
-            <motion.button
+            <Button
               key={type}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => handleArrayToggle('propertyTypes', type)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              className={`px-3 py-2 text-sm ${
                 localFilters.propertyTypes.includes(type)
                   ? 'bg-primary text-white'
                   : 'bg-surface text-gray-700 hover:bg-gray-200'
               }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {type}
-            </motion.button>
+            </Button>
           ))}
         </div>
       </div>
 
       {/* Features */}
       <div className="mt-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <Text as="label" className="block text-sm font-medium text-gray-700 mb-3">
           Features & Amenities
-        </label>
+        </Text>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {features.map(feature => (
-            <motion.button
+            <Button
               key={feature}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => handleArrayToggle('features', feature)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-left ${
+              className={`px-3 py-2 text-sm text-left ${
                 localFilters.features.includes(feature)
                   ? 'bg-primary text-white'
                   : 'bg-surface text-gray-700 hover:bg-gray-200'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               {feature}
-            </motion.button>
+            </Button>
           ))}
         </div>
       </div>
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-3 mt-8">
-        <motion.button
+        <Button
+          onClick={handleApplyFilters}
+          className="flex-1 bg-accent text-white hover:shadow-lg"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleApplyFilters}
-          className="flex-1 bg-accent text-white py-3 rounded-lg font-medium hover:shadow-lg transition-all duration-200"
         >
           Apply Filters
-        </motion.button>
-        <motion.button
+        </Button>
+        <Button
+          onClick={handleResetFilters}
+          className="flex-1 bg-gray-200 text-gray-700 hover:bg-gray-300"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleResetFilters}
-          className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-all duration-200"
         >
           Reset All
-        </motion.button>
+        </Button>
       </div>
     </motion.div>
   );

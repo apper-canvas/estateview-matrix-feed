@@ -1,8 +1,8 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ApperIcon from './components/ApperIcon';
-import { routes } from './config/routes';
+import ApperIcon from '@/components/ApperIcon';
+import { routes } from '@/config/routes';
 
 const Layout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -22,7 +22,7 @@ const Layout = () => {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <NavLink to="/" className="flex items-center space-x-2">
+<NavLink to="/browse" className="flex items-center space-x-2">
                 <ApperIcon name="Home" className="w-8 h-8 text-primary" />
                 <span className="text-xl font-display font-bold text-primary">
                   EstateView

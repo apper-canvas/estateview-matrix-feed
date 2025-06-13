@@ -1,7 +1,8 @@
-import Browse from '../pages/Browse';
-import PropertyDetails from '../pages/PropertyDetails';
-import MapView from '../pages/MapView';
-import SavedProperties from '../pages/SavedProperties';
+import BrowsePage from '@/components/pages/BrowsePage';
+import PropertyDetailsPage from '@/components/pages/PropertyDetailsPage';
+import MapViewPage from '@/components/pages/MapViewPage';
+import SavedPropertiesPage from '@/components/pages/SavedPropertiesPage';
+import HomePage from '@/components/pages/HomePage';
 
 export const routes = {
   browse: {
@@ -9,28 +10,36 @@ export const routes = {
     label: 'Browse',
     path: '/browse',
     icon: 'Home',
-    component: Browse
+component: BrowsePage
   },
   map: {
     id: 'map',
     label: 'Map View',
     path: '/map',
     icon: 'Map',
-    component: MapView
+component: MapViewPage
   },
   saved: {
     id: 'saved',
     label: 'Saved Properties',
     path: '/saved',
     icon: 'Heart',
-    component: SavedProperties
+component: SavedPropertiesPage
   },
   property: {
     id: 'property',
     label: 'Property Details',
     path: '/property/:id',
     icon: 'Building',
-    component: PropertyDetails,
+component: PropertyDetailsPage,
+    hidden: true
+  }
+home: {
+    id: 'home',
+    label: 'Home',
+    path: '/',
+    icon: 'Home',
+    component: HomePage,
     hidden: true
   }
 };

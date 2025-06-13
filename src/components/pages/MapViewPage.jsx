@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import PropertyService from '../services/api/PropertyService';
-import ApperIcon from '../components/ApperIcon';
-import PropertyCard from '../components/PropertyCard';
+import PropertyService from '@/services/api/PropertyService';
+import ApperIcon from '@/components/ApperIcon';
+import PropertyCard from '@/components/organisms/PropertyCard';
+import EmptyErrorLoadingState from '@/components/organisms/EmptyErrorLoadingState';
+import Button from '@/components/atoms/Button';
+import PriceDisplay from '@/components/molecules/PriceDisplay';
 
-const MapView = () => {
+const MapViewPage = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.0060 });
+  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.0060 }); // Default NYC
   const [showSidebar, setShowSidebar] = useState(true);
 
   useEffect(() => {
@@ -21,7 +24,6 @@ const MapView = () => {
         const result = await PropertyService.getAll();
         setProperties(result);
         
-        // Set map center to first property if available
         if (result.length > 0 && result[0].coordinates) {
           setMapCenter(result[0].coordinates);
         }
@@ -34,15 +36,6 @@ const MapView = () => {
     };
     loadProperties();
   }, []);
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
 
   if (loading) {
     return (
@@ -60,23 +53,14 @@ const MapView = () => {
   if (error) {
     return (
       <div className="h-screen flex items-center justify-center bg-soft-white px-4">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="text-center"
-        >
-          <ApperIcon name="AlertCircle" className="w-16 h-16 text-error mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Map Loading Error</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => window.location.reload()}
-            className="bg-primary text-white px-6 py-3 rounded-lg font-medium"
-          >
-            Retry
-          </motion.button>
-        </motion.div>
+        <EmptyErrorLoadingState 
+          type="error"
+          icon="AlertCircle"
+          title="Map Loading Error"
+          message={error}
+          onAction={() => window.location.reload()}
+          actionText="Retry"
+        />
       </div>
     );
   }
@@ -130,45 +114,45 @@ const MapView = () => {
               }}
               onClick={() => setSelectedProperty(property)}
             >
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className={`bg-accent text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium min-w-max ${
+              <Button
+                className={`bg-accent text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium min-w-max !px-3 !py-2 !shadow-lg ${
                   selectedProperty?.id === property.id ? 'ring-2 ring-primary' : ''
                 }`}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
-                {formatPrice(property.price)}
-              </motion.div>
+                <PriceDisplay price={property.price} />
+              </Button>
               <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-accent mx-auto"></div>
             </motion.div>
           ))}
 
           {/* Map Controls */}
           <div className="absolute top-4 left-4 flex flex-col space-y-2">
-            <motion.button
+            <Button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="bg-white p-3 rounded-lg shadow-lg hover:shadow-xl !px-0 !py-0"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setShowSidebar(!showSidebar)}
-              className="bg-white p-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <ApperIcon name={showSidebar ? "PanelRightClose" : "PanelRightOpen"} className="w-5 h-5" />
-            </motion.button>
+            </Button>
             
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <motion.button
+              <Button
+                className="block w-full p-3 hover:bg-gray-50 !px-0 !py-0 !bg-transparent"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="block w-full p-3 hover:bg-gray-50 transition-colors"
               >
                 <ApperIcon name="Plus" className="w-5 h-5" />
-              </motion.button>
-              <motion.button
+              </Button>
+              <Button
+                className="block w-full p-3 hover:bg-gray-50 border-t !px-0 !py-0 !bg-transparent"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="block w-full p-3 hover:bg-gray-50 transition-colors border-t"
               >
                 <ApperIcon name="Minus" className="w-5 h-5" />
-              </motion.button>
+              </Button>
             </div>
           </div>
         </div>
@@ -187,29 +171,26 @@ const MapView = () => {
             <h2 className="text-lg font-display font-semibold text-primary">
               Properties ({properties.length})
             </h2>
-            <motion.button
+            <Button
+              onClick={() => setShowSidebar(false)}
+              className="p-2 hover:bg-white rounded-lg md:hidden !px-0 !py-0 !bg-transparent"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setShowSidebar(false)}
-              className="p-2 hover:bg-white rounded-lg transition-colors md:hidden"
             >
               <ApperIcon name="X" className="w-5 h-5" />
-            </motion.button>
+            </Button>
           </div>
         </div>
 
         {/* Property List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {properties.length === 0 ? (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="text-center py-12"
-            >
-              <ApperIcon name="MapPin" className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Properties Found</h3>
-              <p className="text-gray-500">Try adjusting your search criteria</p>
-            </motion.div>
+            <EmptyErrorLoadingState 
+              type="empty"
+              icon="MapPin"
+              title="No Properties Found"
+              message="Try adjusting your search criteria"
+            />
           ) : (
             properties.map((property, index) => (
               <motion.div
@@ -238,4 +219,4 @@ const MapView = () => {
   );
 };
 
-export default MapView;
+export default MapViewPage;
