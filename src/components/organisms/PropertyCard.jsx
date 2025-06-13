@@ -37,10 +37,9 @@ const checkSavedStatus = async () => {
     checkSavedStatus();
   }, [property.Id]);
 
-  const formatSquareFeet = (sqft) => {
-    return sqft ? sqft.toLocaleString() : 'N/A';
-  };
+const handleSaveProperty = async (e) => {
 
+  useEffect(() => {
   const handleSaveProperty = async (e) => {
 
   useEffect(() => {

@@ -46,11 +46,9 @@ const loadProperty = async () => {
     };
     loadProperty();
   }, [id, navigate]);
+}, [id, navigate]);
 
-  const formatSquareFeet = (sqft) => {
-    return sqft ? sqft.toLocaleString() : 'N/A';
-  };
-
+const handleSaveProperty = async () => {
 const handleSaveProperty = async () => {
     try {
       if (isSaved) {
