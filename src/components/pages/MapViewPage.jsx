@@ -62,36 +62,8 @@ const loadProperties = async () => {
     );
   }
 
-  return (
-
-  if (loading) {
-    return (
-      <div className="h-screen flex">
-        <div className="flex-1 bg-gray-200 animate-pulse"></div>
-        <div className="w-96 bg-white p-4 space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-soft-white px-4">
-        <EmptyErrorLoadingState 
-          type="error"
-          icon="AlertCircle"
-          title="Map Loading Error"
-          message={error}
-          onAction={() => window.location.reload()}
-          actionText="Retry"
-        />
-      </div>
-    );
-  }
-
+return (
+    <div className="h-screen flex overflow-hidden">
   return (
     <div className="h-screen flex overflow-hidden">
       {/* Map Container */}
